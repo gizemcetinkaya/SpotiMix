@@ -5,11 +5,27 @@ import { getCategories } from "../api/categories";
 import { Item as releasesItem } from "../types/newReleases";
 import { Item as playlistsItem } from "../types/featuredPlaylists";
 import { Item as categoriesItem } from "../types/categories";
+import { Item as songsItem } from "../types/search";
+
+interface song {
+    id: string;
+    name: string;
+    image: string;
+    artist: string;
+    link: string;
+}
 
 interface MusicState {
     newReleases: releasesItem[];
     featuredPlaylists: playlistsItem[];
     categories: categoriesItem[];
+    songs: {
+        songs: song[],
+        isPlaying: boolean,
+        repeat: boolean,
+        random: boolean,
+        currentSong: song
+    };
     loading: boolean;
     error: string;
 }
@@ -18,6 +34,25 @@ const initialState: MusicState = {
     newReleases: [],
     featuredPlaylists: [],
     categories: [],
+    songs: {
+        songs: [{
+            id: "",
+            name: "",
+            image: "",
+            artist: "",
+            link: ""
+        }],
+        isPlaying: false,
+        repeat: false,
+        random: false,
+        currentSong: {
+            id: "",
+            name: "",
+            image: "",
+            artist: "",
+            link: ""
+        }
+    },
     loading: false,
     error: ''
 }
@@ -37,7 +72,18 @@ export const fetchCategories = createAsyncThunk("fetchCategories", async () => {
 const musicSlice = createSlice({
     name: "music",
     initialState,
-    reducers: {},
+    reducers: {
+        setSongs: (state, action: PayloadAction<song[]>) => {
+            state.songs.songs = action.payload;
+        },
+        setCurrentSong: (state, action: PayloadAction<song>) => {
+            state.songs.currentSong = action.payload;
+            state.songs.isPlaying = true;
+        },
+        setIsPlaying: (state, action: PayloadAction<boolean>) => {
+            action.payload ? state.songs.isPlaying = true : state.songs.isPlaying = false;
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(fetchNewReleases.pending, (state, action) => {
             state.loading = true;
@@ -85,3 +131,4 @@ const musicSlice = createSlice({
 });
 
 export default musicSlice.reducer;
+export const { setSongs, setCurrentSong, setIsPlaying } = musicSlice.actions;
